@@ -1,0 +1,203 @@
+/* Root Container */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: "Inter", sans-serif;
+}
+
+/* Left section: Form side */
+.auth-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Centered content area */
+.auth-content {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 2.5rem;
+  border-radius: 1.2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Header section */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: #0f172a;
+}
+
+.auth-header p {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+/* Toggle (Sign in / Sign up switch) */
+.auth-toggle {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-toggle p {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Shoelace button overrides */
+sl-button::part(base) {
+  font-weight: 600;
+}
+
+sl-button[variant="primary"]::part(base) {
+  background-color: #2563eb;
+  color: white;
+  border-radius: 6px;
+  padding: 0.4rem 1.2rem;
+}
+
+sl-button[variant="primary"]::part(base):hover {
+  background-color: #1d4ed8;
+}
+
+sl-button[variant="default"][outline]::part(base) {
+  border-color: #2563eb;
+  color: #2563eb;
+  background-color: white;
+}
+
+sl-button[variant="default"][outline]::part(base):hover {
+  background-color: #eff6ff;
+}
+
+/* Right section: Image side */
+.auth-right {
+  flex: 1;
+  position: relative;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .auth-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+}
+
+.auth-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.auth-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top left,
+    rgba(15, 23, 42, 0.75),
+    rgba(15, 23, 42, 0.5),
+    transparent
+  );
+}
+
+.auth-text {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  color: #fff;
+  padding: 2rem;
+}
+
+.auth-text h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.auth-text p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #f1f5f9;
+}
+/* Additions to the bottom of auth-form.css */
+
+/* Forgot password link */
+.auth-links {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.forgot-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.forgot-link:hover {
+  color: #1d4ed8;
+}
+
+/* Terms and Privacy */
+.auth-terms {
+  font-size: 0.8rem;
+  text-align: center;
+  color: #64748b;
+  margin-top: 1rem;
+}
+
+.auth-terms a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-terms a:hover {
+  text-decoration: underline;
+}
+
+
+/* Responsive tweaks */
+@media (max-width: 767px) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-content {
+    max-width: 90%;
+    padding: 2rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .auth-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .auth-text {
+    display: none;
+  }
+}

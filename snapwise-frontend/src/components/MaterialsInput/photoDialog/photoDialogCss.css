@@ -1,0 +1,68 @@
+/* Keep the panel above and allow dropdown to overflow */
+.pd-root::part(panel) {
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: visible;           /* <-- critical for non-hoisted popup */
+  position: relative;          /* <-- anchor containing block */
+  z-index: 1000;               /* ensure above page chrome */
+}
+
+/* Header */
+.pd-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: -6px 0 8px;
+}
+.pd-head-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Preview */
+.pd-preview {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 10px;
+}
+.pd-preview img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--sl-color-neutral-200);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+}
+
+/* Form grid */
+.pd-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.pd-field { display: flex; flex-direction: column; gap: 6px; }
+.pd-colspan-2 { grid-column: span 2; }
+.pd-label { font-size: 0.85rem; color: var(--sl-color-neutral-700); font-weight: 600; }
+
+/* Inline radios */
+.pd-row-inline { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* Footer */
+.pd-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pd-actions { display: flex; gap: 8px; }
+
+
+/* Responsive */
+@media (max-width: 680px) {
+  .pd-preview { grid-template-columns: 120px 1fr; }
+  .pd-preview img { width: 120px; height: 120px; }
+  .pd-grid { grid-template-columns: 1fr; }
+  .pd-colspan-2 { grid-column: auto; }
+  .pd-footer { flex-direction: column; align-items: stretch; }
+}

@@ -1,0 +1,220 @@
+/* ==============================
+   ROOT DIALOG STRUCTURE
+============================== */
+.npd-root::part(panel) {
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  max-width: 1100px;
+  background: #f9fafb;
+}
+
+/* Main scrollable area inside dialog */
+.npd-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 4px 20px;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+/* ==============================
+   CARDS (Shoelace sections)
+============================== */
+.npd-section::part(base) {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.npd-section::part(header) {
+  background: #f1f5f9;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f172a;
+  font-size: 15px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.npd-section sl-icon::part(base) {
+  color: #2563eb;
+}
+
+/* ==============================
+   GRID + FORM FIELDS
+============================== */
+.npd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 14px;
+}
+
+.npd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.npd-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.npd-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.npd-colspan-2 {
+  grid-column: span 2;
+}
+
+/* ==============================
+   INPUTS / SELECT / TEXTAREA
+============================== */
+sl-input::part(base),
+sl-select::part(combobox),
+sl-textarea::part(base) {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+}
+
+sl-input::part(form-control-input):focus-visible,
+sl-select::part(form-control-input):focus-visible,
+sl-textarea::part(form-control-input):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  border-color: #2563eb;
+}
+
+/* ==============================
+   PLAN UPLOAD AREA
+============================== */
+.npd-drop {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  position: relative;
+  gap: 10px;
+}
+
+.npd-drop.is-over {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.npd-plan {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.npd-plan img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.npd-plan-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.npd-file {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==============================
+   SELECTED TEAM DISPLAY
+============================== */
+.npd-selected-team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ==============================
+   HELP TEXT / HINTS
+============================== */
+.npd-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* ==============================
+   RESPONSIVE BEHAVIOR
+============================== */
+@media (max-width: 1024px) {
+  .npd-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .npd-colspan-2 {
+    grid-column: auto;
+  }
+
+  .npd-plan img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .npd-content {
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .npd-root::part(panel) {
+    --width: 96vw !important;
+  }
+
+  .npd-section::part(header) {
+    font-size: 14px;
+  }
+
+  .npd-content {
+    padding: 4px 2px 14px;
+    gap: 12px;
+  }
+
+  .npd-grid {
+    gap: 12px;
+  }
+}
+
+/* ==============================
+   BUTTON STYLE OVERRIDE
+============================== */
+sl-button::part(base) {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+sl-badge::part(base) {
+  background-color: #2563eb;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+}

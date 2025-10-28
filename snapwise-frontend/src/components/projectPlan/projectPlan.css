@@ -1,0 +1,81 @@
+.plan-editor-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.plan-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.plan-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.plan-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: crosshair;
+  background: #fafafa;
+}
+
+.plan-pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+}
+
+.plan-pin-icon {
+  color: #ef4444;
+  font-size: 1.4rem;
+}
+
+.plan-pin-label {
+  position: absolute;
+  top: -14px;
+  left: -8px;
+  background: #ffffff;
+  color: #111;
+  font-size: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 3px;
+}
+
+.plan-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  color: #6b7280;
+}
+
+.task-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-pin-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.task-pin-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}

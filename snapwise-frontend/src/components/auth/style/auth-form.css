@@ -1,0 +1,88 @@
+/* Container centers everything on screen */
+.auth-form-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Shoelace card styling */
+.auth-form-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+ 
+}
+
+/* Title */
+.auth-form-title {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.5rem;
+}
+
+/* Form layout */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Button style */
+.auth-btn {
+  width: 100%;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+
+/* Message styling */
+.auth-msg {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #475569;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.6rem;
+  margin-top: 1rem;
+}
+
+/* Responsive layout */
+@media (max-width: 480px) {
+  .auth-form-card {
+    padding: 1.5rem;
+    max-width: 95%;
+  }
+
+  .auth-form-title {
+    font-size: 1.4rem;
+  }
+
+  .auth-btn {
+    padding: 0.6rem;
+  }
+}
+/* Dialog text and layout */
+.dialog-text {
+  font-size: 0.95rem;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.dialog-msg {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  color: #2563eb;
+}
+
+.dialog-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
