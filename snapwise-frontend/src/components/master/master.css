@@ -1,102 +1,156 @@
 :root {
-  --mv-sidebar-width: 300px;
-  --mv-sidebar-width-collapsed: 72px;
-  --mv-gap: 12px;
-  --mv-bg: #f7f7f8;
-  --mv-border: #e6e6ea;
-  --mv-text: #101114;
-  --mv-subtext: #6b7280;
-  --mv-card: #ffffff;
+  --mv-bg: #f8f9fb;
+  --mv-sidebar-bg: #081e2c;
+  --mv-sidebar-width: 260px;
+  --mv-sidebar-width-collapsed: 80px;
+  --mv-transition: 0.25s ease;
+  --mv-text-light: #e5e7eb;
+  --mv-text-white: #ffffff;
 }
 
-/* Container */
+/* ===============================
+   Layout Grid
+   =============================== */
 .mv-root {
   display: grid;
   grid-template-columns: var(--mv-sidebar-width) 1fr;
-  grid-template-rows: 100dvh;
+  height: 100vh;
   width: 100%;
-  height: 100dvh;
   background: var(--mv-bg);
-  color: var(--mv-text);
-  overflow: hidden;
+  transition: grid-template-columns var(--mv-transition);
+  padding: 0;
+  margin: 0;
 }
 
 .mv-root.is-collapsed {
   grid-template-columns: var(--mv-sidebar-width-collapsed) 1fr;
 }
 
-/* Sidebar */
+/* ===============================
+   Sidebar
+   =============================== */
 .mv-sidebar {
+  background: var(--mv-sidebar-bg);
+  color: var(--mv-text-light);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--mv-border);
-  background: #fff;
-  min-width: 0;
+  justify-content: flex-start;
+  height: 100%;
+  overflow: hidden;
+  transition: width var(--mv-transition);
 }
 
-.mv-sidebar-head {
+/* ===============================
+   Sidebar Header (Logo + Collapse)
+   =============================== */
+.mv-sidebar-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-  border-bottom: 1px solid var(--mv-border);
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.mv-brand {
+.mv-logo {
+  width: 120px;
+  object-fit: contain;
+  transition: width var(--mv-transition), opacity var(--mv-transition);
+}
+
+.mv-root.is-collapsed .mv-logo {
+  width: 42px;
+  opacity: 0.85;
+}
+
+/* Collapse button */
+.mv-collapse-btn::part(base) {
+  background: transparent;
+  border: none;
+  color: var(--mv-text-white);
+  font-size: 1.3rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  transition: background var(--mv-transition), color var(--mv-transition);
+}
+.mv-collapse-btn:hover::part(base) {
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.mv-brand sl-avatar {
-  --size: 32px;
-}
-
-.mv-brand-name {
-  font-weight: 600;
-}
-
-.mv-collapse-btn {
-  margin-left: auto;
-}
-
+/* ===============================
+   New Project Button
+   =============================== */
 .mv-actions {
-  padding: 10px;
-  border-bottom: 1px solid var(--mv-border);
+  padding: 10px 14px;
   display: flex;
-  gap: 8px;
+  justify-content: center;
+}
+.mv-new-project-btn::part(base) {
+  width: 100%;
+  font-size: 0.9rem;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background var(--mv-transition);
+}
+.mv-new-project-btn:hover::part(base) {
+  background: #1d4ed8;
 }
 
+/* ===============================
+   Divider
+   =============================== */
+.mv-divider {
+  border-color: rgba(255, 255, 255, 0.15);
+  margin: 6px 0;
+}
+
+/* ===============================
+   Project List
+   =============================== */
 .mv-projects {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  gap: 4px;
-  overflow: auto;
-  scrollbar-gutter: stable;
-  flex: 1;
+  padding: 6px 8px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .mv-project-item {
+  background: transparent;
+  border: none;
+  color: var(--mv-text-light);
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  padding: 8px 10px;
-  border-radius: 8px;
+  font-size: 14px;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--mv-transition), color var(--mv-transition);
 }
-
 .mv-project-item:hover {
-  background: #f2f2f4;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--mv-text-white);
+}
+.mv-project-item.is-active {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--mv-text-white);
 }
 
-.mv-project-item.is-active {
-  background: #eef2ff;
-  outline: 1px solid #d7defe;
+.mv-project-icon {
+  font-size: 1.2rem;
 }
 
 .mv-project-name {
@@ -105,145 +159,204 @@
   text-overflow: ellipsis;
 }
 
-.mv-empty {
-  padding: 12px;
-  color: var(--mv-subtext);
-  font-size: 14px;
+/* Collapsed state: only icons visible */
+.mv-root.is-collapsed .mv-project-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+.mv-root.is-collapsed .mv-project-name {
+  display: none;
+}
+.mv-root.is-collapsed .mv-project-icon {
+  font-size: 1.5rem;
 }
 
+/* ===============================
+   Sidebar Footer (User Info)
+   =============================== */
 .mv-sidebar-foot {
-  border-top: 1px solid var(--mv-border);
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mv-sidebar-foot sl-avatar {
-  --size: 28px;
-}
-
-.mv-user {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  align-items: center;
+  transition: all var(--mv-transition);
 }
 
+.mv-user-info {
+  text-align: center;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.3;
+}
 .mv-user-name {
   font-weight: 600;
-  font-size: 14px;
+  color: var(--mv-text-white);
 }
-
 .mv-user-role {
-  color: var(--mv-subtext);
   font-size: 12px;
+  color: #9ca3af;
 }
 
-/* Right panel (stage) */
+/* Collapsed hides user text */
+.mv-root.is-collapsed .mv-user-info {
+  display: none;
+}
+
+/* ===============================
+   Stage (Main Panel)
+   =============================== */
 .mv-stage {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  background: var(--mv-bg);
+  transition: margin var(--mv-transition);
 }
 
+/* Header inside right panel */
 .mv-stage-head {
   height: 56px;
-  border-bottom: 1px solid var(--mv-border);
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   background: #fff;
+  border-bottom: 1px solid #e6e6ea;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .mv-breadcrumbs {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  color: var(--mv-subtext);
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
+  color: #6b7280;
 }
 
 .mv-head-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+  transition: opacity var(--mv-transition);
 }
 
-.mv-card-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+/* Hide header buttons when collapsed */
+.mv-root.is-collapsed .mv-head-actions {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
+
+/* Stage body */
 .mv-stage-body {
-  padding: 16px;
+  flex: 1;
   overflow: auto;
-  display: grid;
-  align-content: start;
-  gap: var(--mv-gap);
-}
-.avatar-group sl-avatar:not(:first-of-type) {
-    margin-left: -1rem;
-  }
-
-  .avatar-group sl-avatar::part(base) {
-    border: solid 2px var(--sl-color-neutral-0);
-  }
-.mv-card {
-  background: var(--mv-card);
-  border: 1px solid var(--mv-border);
-  border-radius: 14px;
   padding: 16px;
-  display: flex
-;
-    align-items: baseline;
-    justify-content: space-between;
 }
 
-.mv-card-title {
-  margin: 0 0 4px;
-  font-size: 18px;
-  font-weight: 700;
+/* ===============================
+   Cards and placeholders
+   =============================== */
+.mv-card {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
 }
+.card-project-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mv-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+/* ===========================
+   Create Task Button
+   =========================== */
+.create-task-btn::part(base) {
+  background: #16a34a; /* green-600 */
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.25s ease, transform 0.15s ease;
+  border: none;
+}
+
+/* ===========================
+   Icon-only Create Task Button
+   =========================== */
+.create-task-icon-btn::part(base) {
+ background: rgba(146, 76, 30, 0.1);
+  border: none;
+  color: #16a34a; /* green-600 */
+  font-size: 1.4rem;
+  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.create-task-icon-btn:hover::part(base) {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d; /* darker green */
+  transform: scale(1.1);
+}
+
+.create-task-icon-btn:active::part(base) {
+  background: rgba(21, 128, 61, 0.15);
+  transform: scale(1.0);
+}
+
 
 .mv-card-sub {
-  margin: 0 0 16px;
-  color: var(--mv-subtext);
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 10px;
 }
-
-.mv-card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+.mv-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-
-.mv-kpi {
-  background: #fafafa;
-  border: 1px solid var(--mv-border);
-  border-radius: 12px;
-  padding: 12px;
+.mv-muted {
+  font-size: 13px;
+  color: #9ca3af;
 }
-
-.mv-kpi-label {
-  font-size: 12px;
-  color: var(--mv-subtext);
-}
-
-.mv-kpi-value {
-  font-weight: 700;
-  margin-top: 2px;
-}
-
-/* Placeholder when nothing selected */
 .mv-placeholder {
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  color: var(--mv-subtext);
-  padding: 40px 0;
+  text-align: center;
+  color: #6b7280;
+  margin-top: 20%;
 }
 
-@media (max-width: 900px) {
-  .mv-card-grid {
-    grid-template-columns: 1fr;
-  }
+/* ===============================
+   Buttons override
+   =============================== */
+
+
+
+/* ===============================
+   Scrollbar Styling
+   =============================== */
+.mv-projects::-webkit-scrollbar {
+  width: 6px;
+}
+.mv-projects::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
 }

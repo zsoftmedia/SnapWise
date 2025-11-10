@@ -1,0 +1,27 @@
+/* ===========================
+   Building Icon Trigger (same style as Create Task)
+   =========================== */
+.project-detail-trigger::part(base) {
+  background: rgba(146, 76, 30, 0.1);
+  border: none;
+  color: #11c1e9; /* green-600 */
+  font-size: 1.4rem;
+  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.project-detail-trigger:hover::part(base) {
+  background: rgba(22, 163, 74, 0.1);
+  color: #15803d; /* darker green */
+  transform: scale(1.1);
+}
+
+.project-detail-trigger:active::part(base) {
+  background: rgba(21, 128, 61, 0.15);
+  transform: scale(1.0);
+}

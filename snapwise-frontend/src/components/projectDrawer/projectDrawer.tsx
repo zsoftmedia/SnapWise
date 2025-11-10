@@ -7,6 +7,7 @@ import {
   SlIcon
 } from "@shoelace-style/shoelace/dist/react";
 import { useGetProjectsQuery } from "../../api/project/projectsApi";
+import "./projectDrawer.css"
 
 type Pin = {
   id: string;
@@ -49,114 +50,91 @@ export default function ProjectDrawer({ projectId }: Props) {
 
   return (
     <>
-      <SlButton
-        variant="primary"
-        onClick={() => setOpen(true)}
-        size="small"
-        style={{ marginBottom: "10px" }}
-      >
-        <SlIcon name="building" /> View Project Details
-      </SlButton>
+ 
+  <SlButton
+  size="small"
+  variant="text"
+  className="project-detail-trigger"
+  onClick={() => setOpen(true)}
+>
+  <SlIcon     name="layout-text-sidebar-reverse" />
+</SlButton>
 
-      <SlDrawer
-        label={`Project Details${project ? ` – ${project.name}` : ""}`}
-        open={open}
-        onSlAfterHide={() => setOpen(false)}
-        placement="end"
-      >
-        {project ? (
-          <div className="project-drawer">
-            <h3>{project.name}</h3>
-            <SlDivider />
-            <p><strong>Location:</strong> {project.location}</p>
-            <p><strong>Supervisor:</strong> {project.supervisor || "—"}</p>
-            <p><strong>Work Type:</strong> {project.work_type || "—"}</p>
-            <p><strong>Client:</strong> {project.client_name || "—"}</p>
-            <p><strong>Budget:</strong> {project.budget_eur ? `${project.budget_eur} €` : "—"}</p>
-            <p><strong>Start:</strong> {project.start_date || "—"}</p>
-            <p><strong>End:</strong> {project.end_date || "—"}</p>
 
-            <SlDivider />
+  <SlDrawer
+    label={`Project Details${project ? ` – ${project.name}` : ""}`}
+    open={open}
+    onSlAfterHide={() => setOpen(false)}
+    placement="end"
+  >
+    {project ? (
+      <div className="project-drawer">
+        <h3>{project.name}</h3>
+        <SlDivider />
+        <p><strong>Location:</strong> {project.location}</p>
+        <p><strong>Supervisor:</strong> {project.supervisor || "—"}</p>
+        <p><strong>Work Type:</strong> {project.work_type || "—"}</p>
+        <p><strong>Client:</strong> {project.client_name || "—"}</p>
+        <p><strong>Budget:</strong> {project.budget_eur ? `${project.budget_eur} €` : "—"}</p>
+        <p><strong>Start:</strong> {project.start_date || "—"}</p>
+        <p><strong>End:</strong> {project.end_date || "—"}</p>
 
-            <div style={{ marginBottom: "6px" }}>
-              <strong>Blueprint / Plan:</strong>
-            </div>
+        <SlDivider />
 
-            {project.plan_image_url ? (
+        <div style={{ marginBottom: "6px" }}>
+          <strong>Blueprint / Plan:</strong>
+        </div>
+
+        {project.plan_image_url ? (
+          <div
+            className="plan-wrapper"
+            onClick={handleAddPin}
+          >
+            <img
+              ref={imageRef}
+              src={project.plan_image_url}
+              alt="Project Plan"
+              className="plan-img"
+            />
+
+            {pins.map((pin) => (
               <div
-                className="plan-wrapper"
-                onClick={handleAddPin}
-                style={{
-                  position: "relative",
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                  cursor: "crosshair"
+                key={pin.id}
+                className="plan-pin"
+                style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                title={pin.name}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeletePin(pin.id);
                 }}
               >
-                <img
-                  ref={imageRef}
-                  src={project.plan_image_url}
-                  alt="Project Plan"
-                  className="plan-img"
-                  style={{
-                    width: "100%",
-                    display: "block",
-                    userSelect: "none"
-                  }}
-                />
-
-                {pins.map((pin) => (
-                  <div
-                    key={pin.id}
-                    style={{
-                      position: "absolute",
-                      left: `${pin.x}%`,
-                      top: `${pin.y}%`,
-                      transform: "translate(-50%, -50%)",
-                      background: "#2563eb",
-                      color: "white",
-                      borderRadius: "50%",
-                      width: "24px",
-                      height: "24px",
-                      fontSize: "10px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer"
-                    }}
-                    title={pin.name}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeletePin(pin.id);
-                    }}
-                  >
-                    {pin.name.split(" ")[1]}
-                  </div>
-                ))}
+                {pin.name.split(" ")[1]}
               </div>
-            ) : (
-              <div className="tf-empty">No plan image uploaded yet.</div>
-            )}
-
-            {pins.length > 0 && (
-              <>
-                <SlDivider />
-                <h4>Pins</h4>
-                <ul>
-                  {pins.map((p) => (
-                    <li key={p.id}>
-                      <SlBadge variant="primary">{p.name}</SlBadge>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
+            ))}
           </div>
         ) : (
-          <div>No project found.</div>
+          <div className="tf-empty">No plan image uploaded yet.</div>
         )}
-      </SlDrawer>
-    </>
+
+        {pins.length > 0 && (
+          <>
+            <SlDivider />
+            <h4>Pins</h4>
+            <ul>
+              {pins.map((p) => (
+                <li key={p.id}>
+                  <SlBadge variant="primary">{p.name}</SlBadge>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    ) : (
+      <div>No project found.</div>
+    )}
+  </SlDrawer>
+</>
+
   );
 }
