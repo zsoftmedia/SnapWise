@@ -5,6 +5,8 @@ import AppShell from "./components/layout/appShell";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Master from "./components/master/master";
 import ResetPassword from "./components/auth/ResetPassword";
+import JoinWorkplacePage from "./components/pages/invatation/joinWorkplacePage";
+import JoinEmployee from "./components/auth/joinEmployee/joinEmployee";
 
 
 export default function App() {
@@ -12,6 +14,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<AuthPage />} />
       <Route path="/auth/callback" element={<EmailCallback />} />
+      <Route path="/join" element={<JoinEmployee />} />
       <Route element={<AppShell />}>
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Navigate to="/master" replace />} />

@@ -1,0 +1,44 @@
+.plan-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.plan-img {
+  width: 100%;
+  display: block;
+  border-radius: 6px;
+}
+
+.plan-pin {
+  position: absolute;
+  transform: translate(-50%, -90%);
+  cursor: pointer;
+  z-index: 5;
+}
+
+.pin-circle {
+  width: 22px;
+  height: 22px;
+  background: #d33;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+}
+
+.pin-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 8px;
+}
+
+.pin-list li {
+  margin-bottom: 4px;
+}

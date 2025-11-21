@@ -1,5 +1,5 @@
 import { sbAdmin } from "../../utils/lib/supabse";
-
+import { Buffer } from "buffer"; // Ensure Buffer is imported or defined if running in a Node.js environment
 
 /** Domain error wrapper */
 function dbError(message: string, cause?: unknown) {
@@ -51,6 +51,9 @@ export async function uploadPlanImageFromDataUrl(params: {
   return pub.publicUrl;
 }
 
+// -------------------------------------------------------------
+// PROJECT INSERTION - FIX: Added workplace_id to Args and insert call
+// -------------------------------------------------------------
 export type InsertProjectArgs = {
   createdBy: string;
   name: string;
@@ -65,6 +68,7 @@ export type InsertProjectArgs = {
   allowGps: boolean;
   clientName?: string;
   budgetEUR?: number;
+  workplace_id: string; // 🔥 CRITICAL FIX: Explicitly set as required string type
 };
 
 export async function insertProject(args: InsertProjectArgs): Promise<{ id: string }> {
@@ -83,7 +87,8 @@ export async function insertProject(args: InsertProjectArgs): Promise<{ id: stri
       allow_gps: !!args.allowGps,
       client_name: args.clientName ?? null,
       budget_eur: args.budgetEUR ?? null,
-      created_by: args.createdBy
+      created_by: args.createdBy,
+      workplace_id: args.workplace_id // 🔥 CRITICAL FIX: Maps the workplace_id
     })
     .select("id")
     .single();
@@ -93,6 +98,9 @@ export async function insertProject(args: InsertProjectArgs): Promise<{ id: stri
   return { id: data.id as string };
 }
 
+// -------------------------------------------------------------
+// TEAM MEMBERS INSERTION - FIX: Added role
+// -------------------------------------------------------------
 export type InsertTeamMemberArgs = {
   projectRowId: string;
   createdBy: string;
@@ -101,6 +109,8 @@ export type InsertTeamMemberArgs = {
   phone?: string | null;
   email?: string | null;
   userIdExternal?: string | null;
+  role: string; // 🔥 FIX: Added role to ensure permissions are preserved
+  status: string; // Added status as per common employee records
 };
 
 export async function insertTeamMembers(members: InsertTeamMemberArgs[]): Promise<void> {
@@ -113,7 +123,9 @@ export async function insertTeamMembers(members: InsertTeamMemberArgs[]): Promis
     phone: m.phone ?? null,
     email: m.email ?? null,
     user_id_external: m.userIdExternal ?? null,
-    created_by: m.createdBy
+    created_by: m.createdBy,
+    role: m.role, // 🔥 Maps the role
+    status: m.status, // Maps the status
   }));
 
   const { error } = await sbAdmin.from("project_team_members").insert(rows);

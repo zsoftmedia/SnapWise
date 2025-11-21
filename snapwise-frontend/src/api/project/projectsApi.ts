@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { supabase } from "../../lib/supabase";
 
-/* ========= Base URL ========= */
+/* ========= BASE URL ========= */
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000/api";
 
-/* ========= Types ========= */
+/* ========= TYPES ========= */
 
 export type CreateProjectBody = {
   name: string;
@@ -26,7 +26,8 @@ export type CreateProjectBody = {
   allowGps: boolean;
   clientName?: string;
   budgetEUR?: number;
-  created_by?: string; // Supabase user ID
+  created_by?: string;
+  workplace_id: string; // REQUIRED
   teamMembers?: Array<{
     id: string;
     fullName: string;
@@ -50,6 +51,7 @@ export type ProjectRow = {
   name: string;
   location: string;
   project_id: string;
+  workplace_id?: string;
   start_date?: string | null;
   end_date?: string | null;
   supervisor?: string | null;
@@ -60,6 +62,7 @@ export type ProjectRow = {
   client_name?: string | null;
   budget_eur?: number | null;
   created_at: string;
+  created_by: string;
 };
 
 export type TeamMemberRow = {
@@ -75,31 +78,51 @@ export type TeamMemberRow = {
 
 export const projectsApi = createApi({
   reducerPath: "projectsApi",
+
   baseQuery: fetchBaseQuery({
     baseUrl: API_BASE,
-    // ✅ Attach Supabase token to every request
     prepareHeaders: async (headers) => {
       const { data } = await supabase.auth.getSession();
       const token = data?.session?.access_token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
+      if (token) headers.set("Authorization", `Bearer ${token}`);
       return headers;
     },
   }),
+
   tagTypes: ["Projects", "ProjectTeam"],
 
   endpoints: (builder) => ({
     /* ========= GET /api/projects ========= */
-   getProjects: builder.query<ProjectRow[], string | void>({
-  query: (userId) => ({
-    url: userId ? `/projects?userId=${userId}` : "/projects",
-    method: "GET",
-  }),
-  transformResponse: (response: { ok: boolean; data: ProjectRow[] }) =>
-    response.data ?? [],
-  providesTags: ["Projects"],
-}),
+    getProjects: builder.query<ProjectRow[], string | void>({
+      query: (workplaceId) => ({
+        url: workplaceId
+          ? `/projects?workplace_id=${workplaceId}`
+          : "/projects",
+        method: "GET",
+      }),
+
+      // ⭐ UNIVERSAL TRANSFORM — NO EMPTY ARRAY ANYMORE
+      transformResponse: (response: any) => {
+        console.log("🔥 RAW PROJECT RESPONSE →", response);
+
+        // Case 1: direct array
+        if (Array.isArray(response)) return response;
+
+        // Case 2: { ok, data: [...] }
+        if (Array.isArray(response?.data)) return response.data;
+
+        // Case 3: { ok, projects: [...] }
+        if (Array.isArray(response?.projects)) return response.projects;
+
+        // Case 4: { ok, data: { projects: [...] } }
+        if (Array.isArray(response?.data?.projects))
+          return response.data.projects;
+
+        return []; // fallback safe
+      },
+
+      providesTags: ["Projects"],
+    }),
 
     /* ========= POST /api/projects ========= */
     createProject: builder.mutation<CreateProjectResponse, CreateProjectBody>({
@@ -113,14 +136,23 @@ export const projectsApi = createApi({
 
     /* ========= GET /api/projects/:id/team ========= */
     getProjectTeamMembers: builder.query<TeamMemberRow[], string>({
-  query: (projectId) => ({
-    url: `/projects/${projectId}/team`,
-    method: "GET",
-  }),
-  transformResponse: (response: { ok: boolean; data: TeamMemberRow[] }) =>
-    response.data ?? [],
-  providesTags: (_result, _error, id) => [{ type: "ProjectTeam", id }],
-}),
+      query: (projectId) => ({
+        url: `/projects/${projectId}/team`,
+        method: "GET",
+      }),
+
+      transformResponse: (response: any) => {
+        console.log("🔥 RAW TEAM RESPONSE →", response);
+
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.team)) return response.team;
+
+        return [];
+      },
+
+      providesTags: (_result, _error, id) => [{ type: "ProjectTeam", id }],
+    }),
   }),
 });
 

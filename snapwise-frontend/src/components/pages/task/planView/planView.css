@@ -1,0 +1,80 @@
+/* ============================
+   ROOT
+============================ */
+.pv-root {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================
+   TOOLBAR
+============================ */
+.pv-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.pv-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============================
+   PLAN WRAPPER
+============================ */
+.pv-wrapper {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0b1e36;
+
+  /* grid background */
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.pv-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* ============================
+   PIN STYLE
+============================ */
+.pv-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.pv-pin:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.pv-pin-circle {
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}

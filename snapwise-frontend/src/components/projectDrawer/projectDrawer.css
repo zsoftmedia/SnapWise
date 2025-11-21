@@ -1,27 +1,85 @@
-/* ===========================
-   Building Icon Trigger (same style as Create Task)
-   =========================== */
+/* =====================================================
+   Project Detail Trigger Button (Refined UI Version)
+   ===================================================== */
 .project-detail-trigger::part(base) {
-  background: rgba(146, 76, 30, 0.1);
+  background: rgba(17, 193, 233, 0.10); /* subtle cyan tint */
+  color: #0ea5e9;                      /* cyan-500 */
   border: none;
-  color: #11c1e9; /* green-600 */
-  font-size: 1.4rem;
-  border-radius: 6px;
+
   width: 34px;
   height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+
+  border-radius: 6px;
+
+  font-size: 1.35rem;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.15s ease;
 }
 
+/* Hover — brighter, slight lift */
 .project-detail-trigger:hover::part(base) {
-  background: rgba(22, 163, 74, 0.1);
-  color: #15803d; /* darker green */
-  transform: scale(1.1);
+  background: rgba(14, 165, 233, 0.15); /* stronger cyan glass */
+  color: #0284c7;                       /* cyan-600 */
+  transform: translateY(-1px) scale(1.07);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* Active — pressed look */
 .project-detail-trigger:active::part(base) {
-  background: rgba(21, 128, 61, 0.15);
-  transform: scale(1.0);
+  background: rgba(14, 165, 233, 0.25);
+  color: #0369a1;                       /* cyan-700 */
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+.plan-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.plan-img {
+  width: 100%;
+  display: block;
+  border-radius: 6px;
+}
+
+.plan-pin {
+  position: absolute;
+  transform: translate(-50%, -90%);
+  cursor: pointer;
+  z-index: 5;
+}
+
+.pin-circle {
+  width: 22px;
+  height: 22px;
+  background: #d33;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+}
+
+.pin-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 8px;
+}
+
+.pin-list li {
+  margin-bottom: 4px;
 }

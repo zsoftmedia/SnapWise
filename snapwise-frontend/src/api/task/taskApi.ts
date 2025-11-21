@@ -1,7 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { supabase } from "../../lib/supabase";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000/api";
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:4000/api";
 
+/* ---------------------- TYPES ---------------------- */
 export type CreateTaskBody = {
   project_id: string;
   project_readable_id: string;
@@ -14,7 +17,7 @@ export type CreateTaskBody = {
   supervisor?: string | null;
   allow_gps: boolean;
   notes?: string | null;
-  created_by?: string;          // 👈 added field to allow injected user ID
+  created_by?: string | null; 
   created_by_name: string;
   photos: Array<{
     id: string;
@@ -51,6 +54,7 @@ export type TaskRow = {
   supervisor: string | null;
   allow_gps: boolean;
   notes: string | null;
+  created_by: string | null;
   created_by_name: string;
   created_at: string;
 };
@@ -80,12 +84,33 @@ export type TaskPhotoRow = {
   pair_id: string | null;
 };
 
+/* ---------------------- API ---------------------- */
 export const taskApi = createApi({
   reducerPath: "taskApi",
-  baseQuery: fetchBaseQuery({ baseUrl: API_BASE }),
+
+  /* ✅ ADD THE TOKEN HERE */
+  baseQuery: fetchBaseQuery({
+    baseUrl: API_BASE,
+    prepareHeaders: async (headers) => {
+      const { data } = await supabase.auth.getSession();
+      const token = data?.session?.access_token;
+
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+
+      return headers;
+    },
+  }),
+
   tagTypes: ["Tasks", "TaskDetail"],
+
   endpoints: (builder) => ({
-    createTask: builder.mutation<{ ok: boolean; task: { id: string; photos: number } }, CreateTaskBody>({
+    /** CREATE TASK */
+    createTask: builder.mutation<
+      { ok: boolean; task: { id: string; photos: number } },
+      CreateTaskBody
+    >({
       query: (body) => ({
         url: "/tasks",
         method: "POST",
@@ -95,20 +120,21 @@ export const taskApi = createApi({
         { type: "Tasks", id: body.project_id },
       ],
     }),
+
+    /** LIST TASKS */
     getProjectTasks: builder.query<TaskRow[], string>({
-      query: (projectId) => ({
-        url: `/projects/${projectId}/tasks`,
-        method: "GET",
-      }),
+      query: (projectId) => `/projects/${projectId}/tasks`,
       providesTags: (_res, _err, projectId) => [
         { type: "Tasks", id: projectId },
       ],
     }),
-    getTask: builder.query<{ task: TaskRow | null; photos: TaskPhotoRow[] }, string>({
-      query: (taskId) => ({
-        url: `/tasks/${taskId}`,
-        method: "GET",
-      }),
+
+    /** GET SINGLE TASK */
+    getTask: builder.query<
+      { task: TaskRow | null; photos: TaskPhotoRow[] },
+      string
+    >({
+      query: (taskId) => `/tasks/${taskId}`,
       providesTags: (_res, _err, taskId) => [
         { type: "TaskDetail", id: taskId },
       ],
@@ -116,6 +142,7 @@ export const taskApi = createApi({
   }),
 });
 
+/* ---------------------- HOOKS ---------------------- */
 export const {
   useCreateTaskMutation,
   useGetProjectTasksQuery,

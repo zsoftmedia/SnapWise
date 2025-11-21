@@ -3,9 +3,8 @@ import { z } from "zod";
 import { AuthController } from "../../controllers/auth/authController";
 import { requireAuth } from "../../utils/middleware/requireAuth";
 
-// ✅ Add a small validate middleware
 function validate(schema: z.ZodSchema<any>) {
-  return (req:any, res:any, next:any) => {
+  return (req: any, res: any, next: any) => {
     try {
       schema.parse(req.body);
       next();
@@ -33,14 +32,24 @@ const ResendSchema = z.object({
   email: z.string().email(),
 });
 
+/* 🚀 FIX: ADD THIS MISSING SCHEMA */
+const CompleteInviteSchema = z.object({
+  token: z.string().uuid(),
+  password: z.string().min(6),
+});
+
 /* ========= Routes ========= */
 
-// ✅ Public routes (no token required)
+// Public
 router.post("/signup", validate(SignUpSchema), AuthController.signup);
 router.post("/login", validate(LoginSchema), AuthController.login);
 router.post("/resend", validate(ResendSchema), AuthController.resend);
 
-// ✅ Protected route (token required)
+// Invitation Flow
+router.get("/invite/:token", AuthController.verifyInviteToken);
+router.post("/invite/complete", validate(CompleteInviteSchema), AuthController.completeInvite);
+
+// Protected
 router.get("/me", requireAuth, AuthController.me);
 
 export default router;

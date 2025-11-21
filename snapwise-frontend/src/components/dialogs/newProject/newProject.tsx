@@ -12,19 +12,33 @@ import {
   SlSwitch,
   SlTextarea
 } from "@shoelace-style/shoelace/dist/react";
-import { CreateProjectBody, useCreateProjectMutation } from "../../../api/project/projectsApi";
-import { supabase } from "../../../lib/supabase"; // ✅ added
+import {
+  CreateProjectBody,
+  useCreateProjectMutation
+} from "../../../api/project/projectsApi";
+import { supabase } from "../../../lib/supabase";
 import "./newproject.css";
+import { useGetEmployeesQuery } from "../../../api/employee/employeesApi";
 
+/* ============================================================
+   TeamMember TYPE
+============================================================ */
 export type TeamMember = {
   id: string;
   fullName: string;
-  avatarUrl: string;
-  phone: string;
   email: string;
-  userId: string;
-  projectId?: string;
-  defaultProjectId?: string;
+  phone?: string | null;
+  avatarUrl?: string | null;
+  avatarPreview?: string | null;
+  userId?: string | null;
+  workplaceId?: string | null;
+  projectId?: string | null;
+  defaultProjectId?: string | null;
+  role: "owner" | "admin" | "supervisor" | "member" | "viewer";
+  status: "invited" | "active" | "suspended";
+  invitedBy?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type NewProjectPayload = {
@@ -41,49 +55,94 @@ type NewProjectPayload = {
   allowGps: boolean;
   clientName?: string;
   budgetEUR?: number;
-  teamMembers?: TeamMember[];
+  teamMembers?: any[];
+  workplace_id: string;
 };
 
 type NewProjectDialogProps = {
   open: boolean;
   onCancel: () => void;
   onCreate: (payload: NewProjectPayload) => void;
+  workplaceId: string;
 };
 
+/* ============================================================
+   Generate readable project ID
+============================================================ */
 function generateReadableProjectId() {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   const yyyy = now.getFullYear();
   const mm = pad(now.getMonth() + 1);
   const dd = pad(now.getDate());
-  const alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let suffix = "";
-  for (let i = 0; i < 4; i++) suffix += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 4; i++)
+    suffix += chars[Math.floor(Math.random() * chars.length)];
   return `PRJ-${yyyy}-${mm}-${dd}-${suffix}`;
 }
 
 const toWorkType = (v?: string): CreateProjectBody["workType"] => {
-  const allowed = ["renovation","new_build","maintenance","electrical","plumbing","masonry","other"] as const;
-  return (allowed as readonly string[]).includes(v ?? "") ? (v as CreateProjectBody["workType"]) : undefined;
+  const allowed = [
+    "renovation",
+    "new_build",
+    "maintenance",
+    "electrical",
+    "plumbing",
+    "masonry",
+    "other"
+  ] as const;
+  return (allowed as readonly string[]).includes(v ?? "")
+    ? (v as CreateProjectBody["workType"])
+    : undefined;
 };
 
-const MOCK_TEAM_MEMBERS: TeamMember[] = [
-  { id: "tm-1", fullName: "Alice Schneider", avatarUrl: "https://i.pravatar.cc/100?img=1", phone: "+43 660 111 1111", email: "alice@example.com", userId: "u-1001" },
-  { id: "tm-2", fullName: "Bernhard Hofer", avatarUrl: "https://i.pravatar.cc/100?img=2", phone: "+43 660 222 2222", email: "bernhard@example.com", userId: "u-1002" },
-  { id: "tm-3", fullName: "Carla Gruber", avatarUrl: "https://i.pravatar.cc/100?img=3", phone: "+43 660 333 3333", email: "carla@example.com", userId: "u-1003" }
-];
+/* ============================================================
+   COMPONENT
+============================================================ */
 
-export default function NewProjectDialog({ open, onCancel, onCreate }: NewProjectDialogProps) {
-  const [createProject, { isLoading, isSuccess }] = useCreateProjectMutation();
+export default function NewProjectDialog({
+  open,
+  onCancel,
+  onCreate,
+  workplaceId
+}: NewProjectDialogProps) {
+  const [createProject, { isLoading }] = useCreateProjectMutation();
 
-  const [userId, setUserId] = useState<string | null>(null); // ✅ Added
+  /* Fetch employees from this workplace */
+  const { data: employeesData } = useGetEmployeesQuery(workplaceId, {
+    skip: !workplaceId
+  });
+
+  const TEAM_MEMBERS: TeamMember[] = useMemo(() => {
+    if (!employeesData?.employees) return [];
+    return employeesData.employees.map((e: any) => ({
+      id: e.id,
+      fullName: e.full_name,
+      email: e.email,
+      phone: e.phone ?? "",
+      avatarUrl: e.avatar_url ?? "",
+      avatarPreview: e.avatar_preview ?? "",
+      userId: e.user_id ?? "",
+      workplaceId: e.workplace_id ?? "",
+      role: e.role,
+      status: e.status,
+      invitedBy: e.invited_by ?? "",
+      createdAt: e.created_at,
+      updatedAt: e.updated_at
+    })) as TeamMember[];
+  }, [employeesData]);
+
+  /* Logged user */
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
       setUserId(data?.user?.id ?? null);
     })();
   }, []);
-console.log(userId)
+
+  /* Form state */
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [projectId, setProjectId] = useState("");
@@ -106,10 +165,10 @@ console.log(userId)
 
   const isFormValid = name.trim().length > 0 && location.trim().length > 0;
 
-  function openSystemFilePicker() {
+  /* File handling */
+  function openFilePicker() {
     fileInputRef.current?.click();
   }
-
   function handlePlanFileList(list: FileList | null) {
     if (!list || list.length === 0) return;
     const file = list[0];
@@ -117,78 +176,99 @@ console.log(userId)
     reader.onload = () => setPlanImageDataUrl(reader.result as string);
     reader.readAsDataURL(file);
   }
-
   function handleDrop(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragOver(false);
     handlePlanFileList(e.dataTransfer.files);
   }
 
+  /* ============================================================
+     CREATE PROJECT — FIX: Team Role & Workplace ID in Payload
+  ============================================================= */
   async function handleCreateProject() {
-  if (!isFormValid) return;
+    if (!isFormValid) return;
 
-  // ✅ Build team members
-  const selectedMembers: TeamMember[] = selectedTeamMemberIds.map(id => {
-    const base = MOCK_TEAM_MEMBERS.find(t => t.id === id)!;
-    const readableId = projectId.trim();
-    return { ...base, projectId: readableId, defaultProjectId: readableId };
-  });
+    // FIX: Explicitly include the employee's existing role
+    const selectedMembers = selectedTeamMemberIds.map((id) => {
+      const e = TEAM_MEMBERS.find((t) => t.id === id)!;
+      return {
+        id: e.id,
+        fullName: e.fullName,
+        email: e.email,
+        phone: e.phone ?? undefined,
+        avatarUrl: e.avatarUrl ?? undefined,
+        userId: e.userId ?? undefined,
+        role: e.role, // 🔥 Role included
+      };
+    });
 
-  // ✅ Build project payload
-  const payload: NewProjectPayload = {
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    location: location.trim(),
-    projectId: projectId.trim(),
-    startDate,
-    endDate,
-    supervisor: supervisor.trim() || undefined,
-    workType: workType || undefined,
-    notes: notes.trim() || undefined,
-    planImageDataUrl,
-    allowGps,
-    clientName: clientName.trim() || undefined,
-    budgetEUR: budget ? Number(budget) || undefined : undefined,
-    teamMembers: selectedMembers.length ? selectedMembers : undefined,
-  };
+    const payload: NewProjectPayload = {
+      id: crypto.randomUUID(),
+      name: name.trim(),
+      location: location.trim(),
+      projectId: projectId.trim(),
+      workplace_id: workplaceId, // ✅ workplaceId included
+      startDate,
+      endDate,
+      supervisor: supervisor.trim() || undefined,
+      workType: workType || undefined,
+      notes: notes.trim() || undefined,
+      planImageDataUrl,
+      allowGps,
+      clientName: clientName.trim() || undefined,
+      budgetEUR: budget ? Number(budget) : undefined,
+      teamMembers: selectedMembers.length ? selectedMembers : undefined
+    };
 
-  // ✅ Add Supabase user ID (required by backend)
-  const body: any = { 
-    ...payload, 
-    workType: toWorkType(payload.workType),
-    created_by: userId || undefined,  // ✅ added field
-  };
+    const body: CreateProjectBody & { workplace_id: string } = {
+      ...payload,
+      workType: toWorkType(payload.workType),
+      created_by: userId || undefined,
+      workplace_id: workplaceId // ✅ workplaceId included in API body
+    };
 
-  try {
-    const res = await createProject(body).unwrap();
-    console.log("Project stored successfully:", res);
-    onCreate(payload);
-  } catch (err) {
-    console.error("Failed to create project:", err);
+    try {
+      await createProject(body).unwrap();
+      onCreate(payload);
+    } catch (err) {
+      console.error("❌ Failed to create project:", err);
+    }
   }
-}
 
+  /* ============================================================
+     RENDER
+  ============================================================= */
   return (
     <SlDialog
       open={open}
       className="npd-root"
       label="Create a New Project"
       onSlRequestClose={(e: any) => {
-        if (e.detail.source === "overlay" || e.detail.source === "keyboard") e.preventDefault();
+        if (e.detail.source === "overlay" || e.detail.source === "keyboard")
+          e.preventDefault();
       }}
       style={{ "--width": "42vw", "--body-spacing": "16px" } as any}
     >
       <div className="npd-content">
+
+        {/* ============================
+            PROJECT PLAN + TEAM (Unchanged UI)
+        ============================ */}
         <SlCard className="npd-section">
           <div slot="header">
             <SlIcon name="image" /> Plan Attachment & Team
           </div>
+
           <div className="npd-grid">
+            {/* PLAN UPLOAD */}
             <div className="npd-field npd-colspan-2">
               <label>Project Plan (Image)</label>
               <div
                 className={`npd-drop ${isDragOver ? "is-over" : ""}`}
-                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDragOver(true);
+                }}
                 onDragLeave={() => setIsDragOver(false)}
                 onDrop={handleDrop}
               >
@@ -197,7 +277,11 @@ console.log(userId)
                     <img src={planImageDataUrl} alt="Project plan" />
                     <div className="npd-plan-meta">
                       <SlBadge pill>image attached</SlBadge>
-                      <SlButton size="small" variant="default" onClick={() => setPlanImageDataUrl(undefined)}>
+                      <SlButton
+                        size="small"
+                        variant="default"
+                        onClick={() => setPlanImageDataUrl(undefined)}
+                      >
                         <SlIcon name="trash" /> Remove
                       </SlButton>
                     </div>
@@ -206,7 +290,7 @@ console.log(userId)
                   <>
                     <SlIcon name="image" />
                     <div>Drag & drop plan here or</div>
-                    <SlButton size="small" onClick={openSystemFilePicker}>
+                    <SlButton size="small" onClick={openFilePicker}>
                       <SlIcon name="upload" /> Upload
                     </SlButton>
                     <input
@@ -224,27 +308,37 @@ console.log(userId)
                 )}
               </div>
             </div>
+
             <div className="npd-field npd-colspan-2">
-              <SlSwitch checked={allowGps} onSlChange={(e: any) => setAllowGps(!!e.target.checked)}>
+              <SlSwitch
+                checked={allowGps}
+                onSlChange={(e: any) => setAllowGps(!!e.target.checked)}
+              >
                 Allow GPS capture for site photos
               </SlSwitch>
             </div>
+
             <div className="npd-field npd-colspan-2">
               <label>Team Members</label>
               <SlSelect
-                size="small"
                 multiple
+                size="small"
                 value={selectedTeamMemberIds}
                 placeholder="Select team members"
                 onSlChange={(e: any) => {
-                  const nextValue = (e.detail?.value ?? e.target.value) as string[] | string;
-                  setSelectedTeamMemberIds(Array.isArray(nextValue) ? nextValue : [nextValue]);
+                  const v = e.detail?.value ?? e.target.value;
+                  setSelectedTeamMemberIds(Array.isArray(v) ? v : [v]);
                 }}
               >
-                {MOCK_TEAM_MEMBERS.map(member => (
-                  <SlOption key={member.id} value={member.id}>
-                    <SlAvatar slot="prefix" image={member.avatarUrl} label={member.fullName} style={{ ["--size" as any]: "20px" }} />
-                    {member.fullName}
+                {TEAM_MEMBERS.map((m) => (
+                  <SlOption key={m.id} value={m.id}>
+                    <SlAvatar
+                      slot="prefix"
+                      image={m.avatarUrl || ""}
+                      label={m.fullName}
+                      style={{ ["--size" as any]: "20px" }}
+                    />
+                    {m.fullName}
                   </SlOption>
                 ))}
               </SlSelect>
@@ -252,51 +346,101 @@ console.log(userId)
           </div>
         </SlCard>
 
+        {/* ============================
+            PROJECT INFO (Unchanged UI)
+        ============================ */}
         <SlCard className="npd-section">
           <div slot="header">
             <SlIcon name="folder" /> Project Information
           </div>
+
           <div className="npd-grid">
             <div className="npd-field">
               <label>Project Name</label>
-              <SlInput size="small" value={name} placeholder="e.g., Building A" onSlChange={(e: any) => setName(e.target.value)} />
+              <SlInput
+                size="small"
+                value={name}
+                placeholder="e.g., Building A"
+                onSlChange={(e: any) => setName(e.target.value)}
+              />
             </div>
+
             <div className="npd-field">
               <label>Location</label>
-              <SlInput size="small" value={location} placeholder="City, Street" onSlChange={(e: any) => setLocation(e.target.value)} />
+              <SlInput
+                size="small"
+                value={location}
+                placeholder="City, Street"
+                onSlChange={(e: any) => setLocation(e.target.value)}
+              />
             </div>
+
             <div className="npd-field">
               <label>Project ID</label>
               <div className="npd-row">
-                <SlInput size="small" value={projectId} placeholder="PRJ-..." onSlChange={(e: any) => setProjectId(e.target.value)} />
-                <SlButton size="small" variant="default" onClick={() => setProjectId(generateReadableProjectId())}>
+                <SlInput
+                  size="small"
+                  value={projectId}
+                  onSlChange={(e: any) => setProjectId(e.target.value)}
+                />
+                <SlButton
+                  size="small"
+                  onClick={() => setProjectId(generateReadableProjectId())}
+                >
                   <SlIcon name="arrow-clockwise" />
                 </SlButton>
               </div>
             </div>
+
             <div className="npd-field">
               <label>Supervisor</label>
-              <SlInput size="small" value={supervisor} placeholder="e.g., Zohaib Ali" onSlChange={(e: any) => setSupervisor(e.target.value)} />
+              <SlInput
+                size="small"
+                value={supervisor}
+                placeholder="e.g., Zohaib Ali"
+                onSlChange={(e: any) => setSupervisor(e.target.value)}
+              />
             </div>
           </div>
         </SlCard>
 
+        {/* ============================
+            TIMELINE (Unchanged UI)
+        ============================ */}
         <SlCard className="npd-section">
           <div slot="header">
             <SlIcon name="calendar-date" /> Timeline
           </div>
+
           <div className="npd-grid">
             <div className="npd-field">
               <label>Start Date</label>
-              <SlInput size="small" type="date" value={startDate ?? ""} onSlChange={(e: any) => setStartDate(e.target.value || undefined)} />
+              <SlInput
+                size="small"
+                type="date"
+                value={startDate ?? ""}
+                onSlChange={(e: any) => setStartDate(e.target.value)}
+              />
             </div>
+
             <div className="npd-field">
               <label>End Date</label>
-              <SlInput size="small" type="date" value={endDate ?? ""} onSlChange={(e: any) => setEndDate(e.target.value || undefined)} />
+              <SlInput
+                size="small"
+                type="date"
+                value={endDate ?? ""}
+                onSlChange={(e: any) => setEndDate(e.target.value)}
+              />
             </div>
+
             <div className="npd-field npd-colspan-2">
               <label>Type of Work</label>
-              <SlSelect size="small" value={workType} placeholder="Select type" onSlChange={(e: any) => setWorkType(e.detail?.value ?? e.target.value)}>
+              <SlSelect
+                size="small"
+                value={workType}
+                placeholder="Select type"
+                onSlChange={(e: any) => setWorkType(e.detail?.value)}
+              >
                 <SlOption value="renovation">Renovation</SlOption>
                 <SlOption value="new_build">New Build</SlOption>
                 <SlOption value="maintenance">Maintenance</SlOption>
@@ -309,35 +453,64 @@ console.log(userId)
           </div>
         </SlCard>
 
+        {/* ============================
+            CLIENT + BUDGET (Unchanged UI)
+        ============================ */}
         <SlCard className="npd-section">
           <div slot="header">
             <SlIcon name="person" /> Client & Budget
           </div>
+
           <div className="npd-grid">
             <div className="npd-field">
               <label>Client</label>
-              <SlInput size="small" value={clientName} placeholder="Client Name" onSlChange={(e: any) => setClientName(e.target.value)} />
+              <SlInput
+                size="small"
+                value={clientName}
+                placeholder="Client Name"
+                onSlChange={(e: any) => setClientName(e.target.value)}
+              />
             </div>
+
             <div className="npd-field">
               <label>Budget (€)</label>
-              <SlInput size="small" type="number" placeholder="e.g., 50000" value={budget} onSlChange={(e: any) => setBudget(e.target.value)} />
+              <SlInput
+                size="small"
+                type="number"
+                value={budget}
+                placeholder="50000"
+                onSlChange={(e: any) => setBudget(e.target.value)}
+              />
             </div>
+
             <div className="npd-field npd-colspan-2">
               <label>Notes</label>
-              <SlTextarea rows={3} placeholder="Project details" value={notes} onSlChange={(e: any) => setNotes(e.target.value)} />
+              <SlTextarea
+                rows={3}
+                value={notes}
+                placeholder="Project details"
+                onSlChange={(e: any) => setNotes(e.target.value)}
+              />
             </div>
           </div>
         </SlCard>
 
+        {/* ============================
+            FOOTER (Unchanged UI)
+        ============================ */}
         <div className="npd-footer">
-          <div className="npd-footer-right">
-            <SlButton size="small" variant="default" onClick={onCancel}>
-              <SlIcon name="x" /> Cancel
-            </SlButton>
-            <SlButton size="small" variant="primary" disabled={!isFormValid || isLoading} onClick={handleCreateProject}>
-              <SlIcon name={isLoading ? "hourglass-split" : "check2"} /> {isLoading ? "Saving..." : "Create Project"}
-            </SlButton>
-          </div>
+          <SlButton size="small" variant="default" onClick={onCancel}>
+            <SlIcon name="x" /> Cancel
+          </SlButton>
+          <SlButton
+            size="small"
+            variant="primary"
+            disabled={!isFormValid || isLoading}
+            onClick={handleCreateProject}
+          >
+            <SlIcon name={isLoading ? "hourglass-split" : "check2"} />{" "}
+            {isLoading ? "Saving..." : "Create Project"}
+          </SlButton>
         </div>
       </div>
     </SlDialog>

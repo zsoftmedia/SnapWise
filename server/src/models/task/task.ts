@@ -7,7 +7,9 @@ function dbError(message: string, cause?: unknown) {
   return err;
 }
 
-/** Insert a task head and return its id */
+/* ============================================================
+   INSERT TASK HEAD  (stores AUTH USER ID in created_by)
+============================================================ */
 export async function insertTaskHead(head: {
   projectId: string;
   projectReadableId: string;
@@ -20,6 +22,7 @@ export async function insertTaskHead(head: {
   supervisor: string | null;
   allowGps: boolean;
   notes: string | null;
+  createdBy: string | null;     // <-- auth user id
   createdByName: string;
 }) {
   const { data, error } = await sbAdmin
@@ -36,7 +39,8 @@ export async function insertTaskHead(head: {
       supervisor: head.supervisor,
       allow_gps: head.allowGps,
       notes: head.notes,
-      created_by_name: head.createdByName
+      created_by: head.createdBy,        // 🔥 store AUTH USER ID
+      created_by_name: head.createdByName,
     })
     .select("id")
     .single();
@@ -45,30 +49,33 @@ export async function insertTaskHead(head: {
   return data!.id as string;
 }
 
-/** Insert many photos for a task */
-export async function insertTaskPhotos(taskId: string, photos: Array<{
-  photoClientId: string;
-  fileName: string;
-  url: string | null;
-  mimeType?: string | null;
-  size?: number | null;
-  phase: "before" | "after" | "other";
-  status: "not_started" | "in_progress" | "blocked" | "finished";
-  description?: string | null;
-  employeesOnTask: number;
-  materials: string[];
-  startedAt?: string | null;
-  finishedAt?: string | null;
-  durationMins: number;
-  locationTag?: string | null;
-  capturedAt: string;
-  captureGroupId: string;
-  spot_id?: string | null;
-
-  // NEW
-  pair_id?: string | null;
-}>) {
-  const rows = photos.map(p => ({
+/* ============================================================
+   INSERT TASK PHOTOS
+============================================================ */
+export async function insertTaskPhotos(
+  taskId: string,
+  photos: Array<{
+    photoClientId: string;
+    fileName: string;
+    url: string | null;
+    mimeType?: string | null;
+    size?: number | null;
+    phase: "before" | "after" | "other";
+    status: "not_started" | "in_progress" | "blocked" | "finished";
+    description?: string | null;
+    employeesOnTask: number;
+    materials: string[];
+    startedAt?: string | null;
+    finishedAt?: string | null;
+    durationMins: number;
+    locationTag?: string | null;
+    capturedAt: string;
+    captureGroupId: string;
+    spot_id?: string | null;
+    pair_id?: string | null;
+  }>
+) {
+  const rows = photos.map((p) => ({
     task_id: taskId,
     photo_client_id: p.photoClientId,
     file_name: p.fileName,
@@ -87,30 +94,23 @@ export async function insertTaskPhotos(taskId: string, photos: Array<{
     captured_at: p.capturedAt,
     capture_group_id: p.captureGroupId,
     spot_id: p.spot_id ?? null,
-    pair_id: p.pair_id ?? null
+    pair_id: p.pair_id ?? null,
   }));
 
   const { error } = await sbAdmin.from("project_task_photos").insert(rows);
   if (error) throw dbError("Failed to insert task photos", error);
 }
 
-export async function listTasksForProject(projectId: string) {
-  const { data, error } = await sbAdmin
-    .from("project_tasks")
-    .select("*")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw dbError("Failed to list tasks", error);
-  return data ?? [];
-}
-
+/* ============================================================
+   GET TASK + PHOTOS
+============================================================ */
 export async function getTaskWithPhotos(taskId: string) {
   const { data: task, error: e1 } = await sbAdmin
     .from("project_tasks")
     .select("*")
     .eq("id", taskId)
     .maybeSingle();
+
   if (e1) throw dbError("Failed to load task", e1);
 
   const { data: photos, error: e2 } = await sbAdmin
@@ -119,7 +119,10 @@ export async function getTaskWithPhotos(taskId: string) {
     .eq("task_id", taskId)
     .order("captured_at", { ascending: true });
 
-  if (e2) throw dbError("Failed to load photos", e2);
+  if (e2) throw dbError("Failed to load task photos", e2);
 
-  return { task, photos: photos ?? [] };
+  return {
+    task,
+    photos: photos ?? [],
+  };
 }

@@ -1,0 +1,23 @@
+.join-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--sl-color-neutral-50);
+}
+
+.join-card {
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.join-info {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #334155;
+  text-align: left;
+}

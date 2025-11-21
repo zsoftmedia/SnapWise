@@ -1,7 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { SlButton, SlIcon, SlSpinner } from "@shoelace-style/shoelace/dist/react";
 import { useGetProjectTasksQuery } from "../../api/task/taskApi";
-
+import { supabase } from "../../lib/supabase";
 import "./projectPlan.css";
 import TaskPinDialog from "./taskPinDialog";
 
@@ -24,9 +24,27 @@ export default function ProjectPlanEditor({
   planUrl,
   supervisor,
   allowGps,
-  createdByName
+  createdByName,
 }: Props) {
-  const { data: tasks, isLoading } = useGetProjectTasksQuery(projectId);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get logged-in user
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserId(data?.user?.id ?? null);
+    })();
+  }, []);
+
+  // Fetch tasks for this project
+  const {
+    data: tasks,
+    isFetching: loadingList,
+    isLoading: initialLoad,
+  } = useGetProjectTasksQuery(projectId, {
+    skip: !projectId,
+  });
+
   const imgRef = useRef<HTMLImageElement>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [pinCoords, setPinCoords] = useState<{ x: number; y: number } | null>(null);
@@ -35,9 +53,11 @@ export default function ProjectPlanEditor({
   const handleImageClick = (e: React.MouseEvent) => {
     const rect = imgRef.current?.getBoundingClientRect();
     if (!rect) return;
+
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
     setPinCoords({ x, y });
+
     setSelectedTask(null);
     setOpenDialog(true);
   };
@@ -48,18 +68,24 @@ export default function ProjectPlanEditor({
         <SlButton size="small" variant="default">
           <SlIcon name="arrow-left" /> Back
         </SlButton>
+
         <SlButton size="small" variant="primary" onClick={() => setOpenDialog(true)}>
           <SlIcon name="plus-lg" /> Create Task
         </SlButton>
       </div>
 
       <div className="plan-image-wrap">
-        {isLoading && (
+        {/* ===========================
+            FIXED LOADING STATE
+        =========================== */}
+        {(initialLoad || loadingList) && (
           <div className="plan-loading">
             <SlSpinner /> Loading plan...
           </div>
         )}
-        {!isLoading && (
+
+        {/* Only show the image when NOT loading */}
+        {!initialLoad && !loadingList && (
           <>
             <img
               ref={imgRef}

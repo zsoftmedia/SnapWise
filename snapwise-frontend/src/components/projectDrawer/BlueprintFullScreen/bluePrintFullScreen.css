@@ -1,0 +1,80 @@
+
+/* ============================
+   Fullscreen Drawer Panel
+============================ */
+.bp-fullscreen::part(panel) {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ============================
+   Blueprint Background Grid
+============================ */
+.bp-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: auto;
+
+  background-color: #0b1e36;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ============================
+   Image Wrapper (Full Size)
+============================ */
+.bp-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================
+   FULL WIDTH / FULL HEIGHT IMAGE
+============================ */
+.bp-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.3);
+}
+
+/* ============================
+   Task Pins
+============================ */
+.bp-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.12s ease;
+}
+
+.bp-pin:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.bp-pin-circle {
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4);
+}
